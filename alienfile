@@ -17,8 +17,8 @@ share {
   gather sub {
     my($self) = @_;
     my $prefix = $self->runtime_prop->{prefix};
-    $self->runtime_prop->{$_} = " -I$prefix/include" for qw( cflags cflags_static );
-    $self->runtime_prop->{$_} = " -L$prefix/lib -lmbedtls" for qw( libs libs_static );
+    $self->runtime_prop->{$_} = " -I$prefix/include -I$prefix/include/mbedtls " for qw( cflags cflags_static );
+    $self->runtime_prop->{$_} = " -L$prefix/lib -lmbedtls " for qw( libs libs_static );
     $self->runtime_prop->{version} = $version;
   };
 }

@@ -16,6 +16,7 @@ $modules{$_} = $_ for qw(
   Alien::Build::Plugin::Fetch::LocalDir
   ExtUtils::MakeMaker
   Test2::V0
+  Test::Alien
 );
 
 $post_diag = sub {
