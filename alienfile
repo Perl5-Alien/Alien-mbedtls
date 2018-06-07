@@ -1,11 +1,24 @@
 use alienfile;
-plugin 'PkgConfig' => 'libfoo';
+
+my $version = '2.9.0';
+
+probe sub { 'share' };
+
 share {
-  plugin Download => (
-    url => 'http://...',
-    filter => qr/*\.tar\.gz$/,
-    version => qr/([0-9\.]+)/,
-  );
-  plugin Extract => 'tar.gz';
-  plugin 'Build::Autoconf';
+  start_url "patch/mbedtls-$version";
+  plugin 'Fetch::LocalDir';
+  plugin 'Extract::Directory';
+
+  build [
+    '%{gmake}',
+    '%{gmake} install DESTDIR=%{.install.prefix}',
+  ];
+  
+  gather sub {
+    my($self) = @_;
+    my $prefix = $self->runtime_prop->{prefix};
+    $self->runtime_prop->{$_} = " -I$prefix/include" for qw( cflags cflags_static );
+    $self->runtime_prop->{$_} = " -L$prefix/lib -lmbedtls" for qw( libs libs_static );
+    $self->runtime_prop->{version} = $version;
+  };
 }
