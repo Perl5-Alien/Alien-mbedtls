@@ -24,9 +24,10 @@ share {
   plugin 'Fetch::LocalDir';
   plugin 'Extract::Directory';
 
+  plugin 'Build::Make' => 'gmake';
   build [
-    '%{gmake}',
-    '%{gmake} install DESTDIR=%{.install.prefix}',
+    '%{make}',
+    '%{make} install DESTDIR=%{.install.prefix}',
   ];
   
   gather sub {
