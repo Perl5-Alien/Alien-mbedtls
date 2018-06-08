@@ -1,4 +1,4 @@
-# Alien::mbedtls [![Build Status](https://secure.travis-ci.org/plicease/Alien-mbedtls.png)](http://travis-ci.org/plicease/Alien-mbedtls)
+# Alien::mbedtls [![Build Status](https://secure.travis-ci.org/Perl5-Alien/Alien-mbedtls.png)](http://travis-ci.org/Perl5-Alien/Alien-mbedtls)
 
 Alienized dependency on mbedtls
 
