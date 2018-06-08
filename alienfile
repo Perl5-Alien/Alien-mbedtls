@@ -1,11 +1,26 @@
 use alienfile;
 
-my $version = '2.9.0';
-
-probe sub { 'share' };
+plugin 'Probe::CBuilder' => (
+  %$_,
+  version => qr/version = '(.*?)'/,
+  program => <<'EOM'
+#include <mbedtls/version.h>
+int
+main(int argc, char *argv[])
+{
+  static char buffer[18];
+  mbedtls_version_get_string(buffer);
+  printf("version = '%s'\n", buffer);
+}
+EOM
+) for
+  { libs => '-lmbedtls -lmbedcrypto', cflags => '' },
+;
 
 share {
-  start_url "patch/mbedtls-$version";
+  my $bundled_version = '2.9.0';
+
+  start_url "patch/mbedtls-$bundled_version";
   plugin 'Fetch::LocalDir';
   plugin 'Extract::Directory';
 
@@ -19,6 +34,6 @@ share {
     my $prefix = $self->runtime_prop->{prefix};
     $self->runtime_prop->{$_} = " -I$prefix/include -I$prefix/include/mbedtls " for qw( cflags cflags_static );
     $self->runtime_prop->{$_} = " -L$prefix/lib -lmbedtls -lmbedcrypto " for qw( libs libs_static );
-    $self->runtime_prop->{version} = $version;
+    $self->runtime_prop->{version} = $bundled_version;
   };
 }
