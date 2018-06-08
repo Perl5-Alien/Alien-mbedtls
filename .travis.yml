@@ -1,8 +1,10 @@
 language: perl
-sudo: false
+sudo: true
 dist: trusty
 
 install:
+  - touch /tmp/alien.install.type.$ALIEN_INSTALL_TYPE
+  - sudo bash maint/install-travis-system-binary
   - perlbrew list
   - cpanm -n Dist::Zilla
   - dzil authordeps --missing | cpanm -n
