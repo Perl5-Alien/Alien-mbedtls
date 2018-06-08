@@ -1,9 +1,9 @@
 #!/bin/sh
 
-VER=2.9.0
+. maint/version.shrc
 
 cd patch
 rm -rf *
-curl -O https://tls.mbed.org/download/mbedtls-$VER-apache.tgz
-tar xvf mbedtls-$VER-apache.tgz
-rm -f mbedtls-$VER-apache.tgz
+curl -O https://tls.mbed.org/download/mbedtls-$VERSION-apache.tgz
+tar xvf mbedtls-$VERSION-apache.tgz
+rm -f mbedtls-$VERSION-apache.tgz
