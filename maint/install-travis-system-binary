@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -f /tmp/alien.install.type.system ]; then
+
+  cd /tmp
+  curl -s -O https://alienfile.org/travis/mbed.tar.gz
+  cd /
+  tar xvf /tmp/mbed.tar.gz
+
+fi

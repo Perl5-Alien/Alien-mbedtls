@@ -1,0 +1,23 @@
+#!/bin/sh
+
+. maint/version.shrc
+
+ROOT=/tmp/mbed-build-$$
+mkdir -p $ROOT
+cp -r patch/mbedtls-$VERSION/ $ROOT/mbedtls-build
+cd $ROOT/mbedtls-build
+
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr       \
+      -DLIB_INSTALL_DIR=lib/x86_64-linux-gnu \
+      -DUSE_STATIC_MBEDTLS_LIBRARY=OFF       \
+      -DUSE_SHARED_MBEDTLS_LIBRARY=ON
+
+make
+make DESTDIR=$ROOT/mbed-destdir install
+
+cd $ROOT/mbed-destdir
+
+tar zcvf ~/dev/alienfile.org/docs/travis/mbed.tar.gz usr/include usr/lib
+
+cd /
+rm -rf $ROOT
