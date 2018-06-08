@@ -2,6 +2,11 @@ language: perl
 sudo: false
 dist: trusty
 
+addons:
+  apt:
+    packages:
+      - libmbedtls-dev
+
 install:
   - perlbrew list
   - cpanm -n Dist::Zilla
