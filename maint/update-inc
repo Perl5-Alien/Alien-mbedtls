@@ -1,0 +1,106 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use 5.014;
+use Alien::Build;
+use Alien::Build::MM;
+
+my $build = Alien::Build->load('./alienfile');
+$build->load_requires($_) for qw ( configure share system );
+my %inc = %INC;
+my %old_perls_need;
+my %do_not_need = map { $_ => 1 } qw(
+  Config_git.pl
+  Config_heavy.pl
+  version::vxs
+  version::regex 
+);
+
+require Module::CoreList;
+require Path::Tiny;
+
+foreach my $pm (sort keys %inc)
+{
+  if($pm =~ /^\//)
+  {
+    delete $inc{$pm};
+    next;
+  }
+  my $mod = $pm;
+  $mod =~ s/\.pm$//;
+  $mod =~ s/\//::/g;
+
+  if($do_not_need{$mod})
+  {
+    delete $inc{$pm};
+    next;
+  }
+  
+  my $perl_version = Module::CoreList->first_release($mod);
+  if(defined $perl_version)
+  {
+    if($perl_version <= 5.008001)
+    {
+      delete $inc{$pm};
+    }
+    elsif($perl_version <= 5.014000)
+    {
+      $old_perls_need{$mod} = 0;
+      delete $inc{$pm};
+    }
+  }
+}
+
+foreach my $pm (sort keys %inc)
+{
+  my $old = Path::Tiny->new($inc{$pm});
+  my $new = Path::Tiny->new('inc', $pm);
+  $new->parent->mkpath;
+  $old->copy($new);
+}
+
+Path::Tiny->new('inc')->visit(
+  sub {
+    my($path) = @_;
+    my $file = "$path";
+    return if -d $file;
+    $file =~ s/^inc\///;
+    return  if $inc{$file};
+    $path->remove;
+  },
+  { recurse => 1 },
+);
+
+require MetaCPAN::Client;
+require YAML;
+
+{
+  my $mcpan = MetaCPAN::Client->new;
+  my $spec = $mcpan->release({
+    all => [
+      { status       => 'latest'      },
+      { distribution => 'Alien-Build' },
+    ],
+  });
+  my $release = $spec->next;
+  my %versions = %{ $release->metadata->{prereqs}->{runtime}->{requires} };
+  foreach my $mod (sort keys %versions)
+  {
+    $old_perls_need{$mod} = $versions{$mod} if defined $old_perls_need{$mod};
+  }
+}
+
+my %meta = (
+  old_perls_need => \%old_perls_need,
+  postamble      => Alien::Build::MM->new->mm_postamble =~ s/(\Q$(FULLPERL)\E)/$1 -Iinc/gr,
+);
+
+Path::Tiny->new('_alien')->remove_tree;
+
+YAML::DumpFile('inc/meta.yml', \%meta);
+
+require Data::Dumper;
+Path::Tiny->new('inc/meta.pl')->spew(
+  Data::Dumper::Dumper(\%meta),
+);
